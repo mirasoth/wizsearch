@@ -1,5 +1,5 @@
 """
-Semantic search orchestrator for cogents.
+Semantic search orchestrator.
 
 This module provides the main SemanticSearch class that coordinates between
 web search, document processing, vector storage, and semantic retrieval.
@@ -11,7 +11,7 @@ import uuid
 from datetime import datetime, timedelta, timezone
 from typing import Any, Dict, List, Optional, Tuple
 
-from cogents_core.vector_store import BaseVectorStore, get_vector_store
+from noesium.core.vector_store import BaseVectorStore, get_vector_store
 from pydantic import BaseModel, Field
 
 from ..base import BaseSearch, SearchResult
@@ -160,7 +160,7 @@ class SemanticSearch:
             self.vector_store = vector_store
 
         # Initialize embedding generator
-        from cogents_core.llm import get_llm_client
+        from noesium.core.llm import get_llm_client
 
         self.embed_client = get_llm_client(provider="ollama", model=self.config.embedding_model)
         self.document_processor = DocumentProcessor(self.config.chunking_config)

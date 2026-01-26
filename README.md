@@ -1,6 +1,6 @@
 # WizSearch
 
-[![CI](https://github.com/caesar0301/wizsearch/actions/workflows/ci.yml/badge.svg)](https://github.com/caesar0301/wizsearch/actions/workflows/ci.yml)
+[![CI](https://github.com/mirasoth/wizsearch/actions/workflows/ci.yml/badge.svg)](https://github.com/mirasoth/wizsearch/actions/workflows/ci.yml)
 [![PyPI version](https://img.shields.io/pypi/v/wizsearch.svg)](https://pypi.org/project/wizsearch/)
 
 A unified Python library for searching across multiple search engines with a consistent interface. WizSearch enables concurrent multi-engine searches with intelligent result merging, page crawling capabilities, and optional semantic search integration.
@@ -448,7 +448,7 @@ export GOOGLE_API_KEY="your-google-api-key"
 
 ```bash
 # Clone repository
-git clone https://github.com/caesar0301/wizsearch.git
+git clone https://github.com/mirasoth/wizsearch.git
 cd wizsearch
 
 # Install development dependencies
@@ -505,6 +505,6 @@ MIT License - see [LICENSE](LICENSE) file for details.
 
 ## Links
 
-- **Homepage**: https://github.com/caesar0301/wizsearch
+- **Homepage**: https://github.com/mirasoth/wizsearch
 - **PyPI**: https://pypi.org/project/wizsearch/
-- **Issues**: https://github.com/caesar0301/wizsearch/issues
+- **Issues**: https://github.com/mirasoth/wizsearch/issues

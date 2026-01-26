@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Google AI Search Demo for cogents-tools
+Google AI Search Demo
 """
 
 import asyncio

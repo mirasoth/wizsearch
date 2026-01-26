@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Tavily Search Demo for cogents-tools
+Tavily Search Demo
 """
 
 import asyncio
