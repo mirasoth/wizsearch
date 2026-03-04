@@ -1,6 +1,8 @@
 import logging
 from typing import Any, Optional
 
+from .base import get_proxy_from_env
+
 logger = logging.getLogger(__name__)
 
 
@@ -26,6 +28,7 @@ class PageCrawler:
         only_text: bool = False,
         session_id: Optional[str] = None,
         extraction_strategy: Optional[str] = None,
+        proxy: Optional[str] = None,
         **kwargs: Any,
     ):
         """
@@ -46,6 +49,8 @@ class PageCrawler:
             only_text: Whether to extract only text content
             session_id: Session ID for maintaining browser state
             extraction_strategy: Strategy for content extraction
+            proxy: Proxy URL (e.g., http://proxy:port). Falls back to
+                   HTTPS_PROXY/HTTP_PROXY env vars if not set.
             **kwargs: Additional crawl4ai parameters
         """
         self.url = url
@@ -62,6 +67,8 @@ class PageCrawler:
         self.only_text = only_text
         self.session_id = session_id
         self.extraction_strategy = extraction_strategy
+        # Resolve proxy: env vars take priority over explicit argument
+        self.proxy = get_proxy_from_env(proxy)
         self.extra_params = kwargs
 
     async def crawl(self) -> str:
@@ -76,13 +83,20 @@ class PageCrawler:
             Exception: If crawling fails
         """
         try:
-            from crawl4ai import AsyncWebCrawler, CrawlerRunConfig
+            from crawl4ai import AsyncWebCrawler, BrowserConfig, CrawlerRunConfig
         except ImportError:
             logger.warning("crawl4ai is not installed. Install with: uv add crawl4ai or pip install crawl4ai")
             logger.info(f"Skipping content crawling for {self.url}")
             return ""
 
         try:
+            # Configure browser with optional proxy
+            browser_kwargs: dict = {}
+            if self.proxy:
+                browser_kwargs["proxy"] = self.proxy
+                logger.debug(f"PageCrawler: using proxy {self.proxy}")
+            browser_config = BrowserConfig(**browser_kwargs)
+
             # Configure crawler parameters
             crawler_config = {
                 "word_count_threshold": self.word_count_threshold,
@@ -110,7 +124,7 @@ class PageCrawler:
 
             logger.info(f"Starting crawl for URL: {self.url}")
 
-            async with AsyncWebCrawler() as crawler:
+            async with AsyncWebCrawler(config=browser_config) as crawler:
                 if self.adaptive_crawl:
                     # Use adaptive crawling if enabled
                     from crawl4ai import AdaptiveCrawler

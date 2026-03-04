@@ -382,7 +382,7 @@ class WizSearch(BaseSearch):
 
         total_time = (datetime.now() - start_time).total_seconds()
         logger.info(
-            f"WizSearch completed in {total_time:.2f} seconds. "
+            f"WizSearch completed '{query}' in {total_time:.2f} seconds. "
             f"Successful engines: {len(engine_results)}/{len(self.engines)}. "
             f"Total unique results: {len(merged_result.sources)}"
         )

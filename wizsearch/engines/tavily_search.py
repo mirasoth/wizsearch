@@ -8,6 +8,7 @@ with the existing search infrastructure.
 
 import asyncio
 import logging
+import os
 from datetime import datetime
 from typing import List, Optional
 
@@ -15,7 +16,7 @@ from langchain_tavily import TavilySearch as LangchainTavilySearch
 from pydantic import BaseModel, ConfigDict, Field
 from typing_extensions import override
 
-from ..base import BaseSearch, SearchResult
+from ..base import BaseSearch, SearchResult, get_proxy_from_env
 
 logger = logging.getLogger(__name__)
 
@@ -37,6 +38,10 @@ class TavilySearchConfig(BaseModel):
     include_images: bool = Field(default=False, description="Include images in results")
     time_range: Optional[str] = Field(None, description="Time range for search results")
     country: Optional[str] = Field(None, description="Country for localized results")
+    proxy: Optional[str] = Field(
+        None,
+        description="Proxy URL (e.g., http://proxy:port). Falls back to HTTPS_PROXY/HTTP_PROXY env vars. Note: applied via env vars since langchain_tavily uses httpx with trust_env=True.",
+    )
 
     model_config = ConfigDict(extra="forbid")
 
@@ -76,6 +81,15 @@ class TavilySearch(BaseSearch):
     def _initialize_search_tool(self) -> None:
         """Initialize the underlying Tavily search tool."""
         try:
+            # Resolve proxy and inject into environment so httpx (used by langchain_tavily)
+            # picks it up via trust_env=True (the default). We only set it if the env var
+            # is not already present, avoiding unintended overwrites of existing settings.
+            proxy = get_proxy_from_env(self.config.proxy)
+            if proxy:
+                os.environ.setdefault("HTTPS_PROXY", proxy)
+                os.environ.setdefault("HTTP_PROXY", proxy)
+                logger.debug(f"Tavily: proxy configured via environment variables: {proxy}")
+
             # Prepare configuration for TavilySearch
             tavily_config = {
                 "max_results": self.config.max_results,

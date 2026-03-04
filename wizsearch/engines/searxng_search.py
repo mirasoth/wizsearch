@@ -11,7 +11,7 @@ import requests
 from pydantic import BaseModel, ConfigDict, Field
 from typing_extensions import override
 
-from ..base import BaseSearch, SearchResult, SourceItem
+from ..base import BaseSearch, SearchResult, SourceItem, get_proxy_from_env
 
 dotenv.load_dotenv()
 
@@ -63,6 +63,10 @@ class SearxNGSearchConfig(BaseModel):
     query_suffix: Optional[str] = Field(default="", description="Suffix to append to queries")
     max_results: int = Field(default=10, ge=1, le=100, description="Maximum number of results to return")
     timeout: int = Field(default=30, ge=1, le=60, description="Request timeout in seconds")
+    proxy: Optional[str] = Field(
+        default=None,
+        description="Proxy URL (e.g., http://proxy:port). Falls back to HTTPS_PROXY/HTTP_PROXY env vars if not set.",
+    )
 
     model_config = ConfigDict(extra="forbid")
 
@@ -101,6 +105,8 @@ class SearxNGSearch(BaseSearch):
 
         self.config = config
         self._validate_and_setup_config()
+        # Resolve proxy: env vars take priority over explicit config value
+        self._proxy = get_proxy_from_env(self.config.proxy)
 
     def _validate_and_setup_config(self) -> None:
         """Validate and setup the configuration."""
@@ -150,13 +156,16 @@ class SearxNGSearch(BaseSearch):
     def _searx_api_query(self, params: Dict[str, Any]) -> SearxNGResults:
         """Perform actual request to SearxNG API."""
         try:
-            response = requests.get(
-                self.config.searx_host,
-                headers=self.config.headers,
-                params=params,
-                verify=not self.config.unsecure,
-                timeout=self.config.timeout,
-            )
+            request_kwargs: Dict[str, Any] = {
+                "headers": self.config.headers,
+                "params": params,
+                "verify": not self.config.unsecure,
+                "timeout": self.config.timeout,
+            }
+            if self._proxy:
+                request_kwargs["proxies"] = {"http": self._proxy, "https": self._proxy}
+
+            response = requests.get(self.config.searx_host, **request_kwargs)
             response.raise_for_status()
 
             if not response.text.strip():
@@ -187,7 +196,11 @@ class SearxNGSearch(BaseSearch):
                 kwargs["ssl"] = False
 
             async with aiohttp.ClientSession() as session:
-                async with session.get(self.config.searx_host, **kwargs) as response:
+                async with session.get(
+                    self.config.searx_host,
+                    proxy=self._proxy,
+                    **kwargs,
+                ) as response:
                     response.raise_for_status()
                     text = await response.text()
 

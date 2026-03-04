@@ -6,7 +6,7 @@ from typing import Optional
 from pydantic import BaseModel, ConfigDict, Field
 from typing_extensions import override
 
-from ..base import BaseSearch, SearchResult, SourceItem
+from ..base import BaseSearch, SearchResult, SourceItem, get_proxy_from_env
 
 try:
     from ddgs import DDGS
@@ -63,6 +63,11 @@ class DuckDuckGoSearch(BaseSearch):
         # Override config with kwargs if provided
         if kwargs:
             config = config.model_copy(update=kwargs)
+
+        # Resolve proxy: env vars take priority over explicit config value
+        resolved_proxy = get_proxy_from_env(config.proxy)
+        if resolved_proxy != config.proxy:
+            config = config.model_copy(update={"proxy": resolved_proxy})
 
         self.config = config
         self._search_client = None

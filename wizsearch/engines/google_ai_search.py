@@ -12,7 +12,7 @@ from google.genai import Client as GenAIClient
 from google.genai import types
 from typing_extensions import override
 
-from ..base import BaseSearch, SearchResult, SourceItem
+from ..base import BaseSearch, SearchResult, SourceItem, get_proxy_from_env
 
 logger = logging.getLogger(__name__)
 
@@ -46,19 +46,35 @@ class GoogleAISearch(BaseSearch):
     Google AI Search client for web research functionality.
     """
 
-    def __init__(self, api_key: Optional[str] = None):
+    def __init__(self, api_key: Optional[str] = None, proxy: Optional[str] = None):
         """
         Initialize the Google AI Search client.
 
         Args:
             api_key: Google GenAI API key. If not provided, will use GEMINI_API_KEY env var.
+            proxy: Proxy URL (e.g., http://proxy:port). If not provided, falls back to
+                   HTTPS_PROXY/HTTP_PROXY env vars.
         """
         self.api_key = api_key or os.getenv("GEMINI_API_KEY")
         if not self.api_key:
             raise ValueError("GEMINI_API_KEY environment variable is required for web search functionality")
 
+        # Resolve proxy: env vars take priority over explicit argument
+        resolved_proxy = get_proxy_from_env(proxy)
+
         try:
-            self.genai_client = GenAIClient(api_key=self.api_key)
+            if resolved_proxy:
+                # google-genai uses httpx internally; configure proxy via a custom httpx transport
+                import httpx
+
+                http_client = httpx.Client(
+                    proxy=resolved_proxy,
+                    follow_redirects=True,
+                )
+                self.genai_client = GenAIClient(api_key=self.api_key, http_client=http_client)
+                logger.debug(f"GoogleAISearch: using proxy {resolved_proxy}")
+            else:
+                self.genai_client = GenAIClient(api_key=self.api_key)
         except Exception as e:
             raise ValueError(f"Failed to initialize Google GenAI client: {e}")
 

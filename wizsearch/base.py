@@ -1,7 +1,38 @@
+import os
 from abc import ABC, abstractmethod
 from typing import Any, List, Optional
 
 from pydantic import BaseModel, ConfigDict, Field
+
+
+def get_proxy_from_env(config_proxy: Optional[str] = None) -> Optional[str]:
+    """
+    Resolve proxy configuration with environment variable override.
+
+    Mirrors tarzi's get_proxy_from_env_or_config() in src/config.rs.
+    Checks environment variables in priority order, then falls back to
+    the explicitly provided config_proxy value.
+
+    Priority order:
+        1. HTTPS_PROXY env var
+        2. HTTP_PROXY env var
+        3. https_proxy env var
+        4. http_proxy env var
+        5. config_proxy argument
+        6. None (no proxy)
+
+    Args:
+        config_proxy: Explicit proxy URL from engine config. Used only when
+                      no proxy env vars are set.
+
+    Returns:
+        Resolved proxy URL string, or None if no proxy is configured.
+    """
+    for env_var in ["HTTPS_PROXY", "HTTP_PROXY", "https_proxy", "http_proxy"]:
+        proxy = os.environ.get(env_var, "").strip()
+        if proxy:
+            return proxy
+    return config_proxy
 
 
 class SourceItem(BaseModel):

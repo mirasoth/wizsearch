@@ -1,11 +1,12 @@
 import asyncio
 import logging
+from typing import Optional
 
 import tarzi
 from pydantic import BaseModel, Field
 from typing_extensions import override
 
-from ..base import BaseSearch, SearchResult, SourceItem
+from ..base import BaseSearch, SearchResult, SourceItem, get_proxy_from_env
 
 logger = logging.getLogger(__name__)
 
@@ -21,18 +22,29 @@ class TarziSearchConfig(BaseModel):
     web_driver: str = Field(default="chromedriver", description="Web driver to use")
     headless: bool = Field(default=False, description="If enable headless browser")
     output_format: str = Field(default="markdown", description="Output format (html|markdown|json|yaml)")
+    proxy: Optional[str] = Field(
+        default=None,
+        description="Proxy URL (e.g., http://proxy:port). If not set, HTTPS_PROXY/HTTP_PROXY env vars are used automatically by tarzi.",
+    )
 
 
 class TarziSearch(BaseSearch):
     def __init__(self, config: TarziSearchConfig):
         self.tarzi_config = config
         fetch_mode = "browser_headless" if config.headless else "browser_head"
+        # Resolve proxy: env vars take priority, then explicit config value.
+        # Note: tarzi's Rust core also reads HTTPS_PROXY/HTTP_PROXY env vars automatically
+        # inside WebFetcher::from_config(). The proxy line in TOML is only needed when an
+        # explicit config proxy is provided without a corresponding env var.
+        proxy = get_proxy_from_env(config.proxy)
+        proxy_line = f'proxy = "{proxy}"' if proxy else ""
         _config_str = f"""
 [fetcher]
 timeout = {config.timeout}
 format = "{config.output_format}"
 web_driver = "{config.web_driver}"
 mode = "{fetch_mode}"
+{proxy_line}
 [search]
 engine = "{config.search_engine}"
 limit = {config.max_results}
