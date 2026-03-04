@@ -175,7 +175,9 @@ class TavilySearch(BaseSearch):
                     transformed_response["sources"] = []
 
             result = SearchResult.model_validate(transformed_response)
-            logger.info(f"Search completed in {response_time:.2f} seconds, {len(result.sources)} results found")
+            logger.info(
+                f"Search completed for '{query}' in {response_time:.2f} seconds, {len(result.sources)} results found"
+            )
             return result
         except Exception as e:
             logger.error(f"Tavily search failed for query '{query}': {e}")

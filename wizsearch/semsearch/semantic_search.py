@@ -276,12 +276,12 @@ class SemanticSearch:
             if self.config.enable_caching:
                 self._cache_result(query, result)
 
-            logger.info(f"Search completed in {search_time:.2f}s: {result.total_results} total results")
+            logger.info(f"Search completed for '{query}' in {search_time:.2f}s: {result.total_results} total results")
             self._show_results_sketch(result)
             return result
 
         except Exception as e:
-            logger.error(f"Semantic search failed for query '{query}': {e}")
+            logger.error(f"Semantic search failed for '{query}': {e}")
             raise SemanticSearchError(f"Search failed: {e}")
 
     def _process_and_store_web_results(self, web_response: SearchResult) -> List[Tuple[DocumentChunk, float]]:

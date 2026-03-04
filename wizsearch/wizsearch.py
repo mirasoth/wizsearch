@@ -321,7 +321,7 @@ class WizSearch(BaseSearch):
         try:
             # Use asyncio.wait_for to implement timeout
             result = await asyncio.wait_for(engine.search(query, **kwargs), timeout=self.config.timeout)
-            logger.info(f"{engine_name} search completed successfully with {len(result.sources)} results")
+            logger.info(f"{engine_name} search completed for '{query}' successfully with {len(result.sources)} results")
             return result
 
         except asyncio.TimeoutError:
@@ -382,7 +382,7 @@ class WizSearch(BaseSearch):
 
         total_time = (datetime.now() - start_time).total_seconds()
         logger.info(
-            f"WizSearch completed '{query}' in {total_time:.2f} seconds. "
+            f"WizSearch completed for '{query}' in {total_time:.2f} seconds. "
             f"Successful engines: {len(engine_results)}/{len(self.engines)}. "
             f"Total unique results: {len(merged_result.sources)}"
         )
