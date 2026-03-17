@@ -28,7 +28,7 @@ jobs:
         run: uv sync --all-extras --dev
 
       - name: Run unit tests
-        run: uv run make test-unit
+        run: make test-unit
 
       - name: Upload test results
         uses: actions/upload-artifact@v4

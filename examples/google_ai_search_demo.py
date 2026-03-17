@@ -56,7 +56,7 @@ async def demo_google_ai_search():
         print("✅ Google AI Search initialized")
 
         # Basic search
-        print(f"\n🌐 Performing basic Google search...")
+        print("\n🌐 Performing basic Google search...")
         query = "quantum computing applications"
         results = await search.search(query=query, num_results=5)
 
@@ -73,7 +73,7 @@ async def demo_google_ai_search():
                 print(f"      Result: {result}")
 
         # Image search
-        print(f"\n🖼️  Image search...")
+        print("\n🖼️  Image search...")
         image_query = "neural network architecture diagrams"
         image_results = await search.search(query=image_query, search_type="image", num_results=3)
 
@@ -87,7 +87,7 @@ async def demo_google_ai_search():
             print(f"      Image: {image_url}")
 
         # Site-specific search
-        print(f"\n🎯 Site-specific search...")
+        print("\n🎯 Site-specific search...")
         site_query = "machine learning site:github.com"
         site_results = await search.search(query=site_query, num_results=3)
 
@@ -104,8 +104,8 @@ async def demo_google_ai_search():
                 print(f"      Result: {result}")
 
     except Exception as e:
-        print(f"   ⚠️  Google AI Search demo failed: {e}")
-        print(f"   This might be due to API credentials or quota issues")
+        print("   ⚠️  Google AI Search demo failed:", e)
+        print("   This might be due to API credentials or quota issues")
 
 
 async def main():

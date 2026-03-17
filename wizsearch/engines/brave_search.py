@@ -9,7 +9,9 @@ class BraveSearchConfig(BaseModel):
     max_results: int = Field(default=10, description="Maximum number of results to return")
     timeout: int = Field(default=15, description="Timeout in seconds")
     web_driver: str = Field(default="chromedriver", description="Web driver to use")
-    headless: bool = Field(default=False, description="If enable headless browser")
+    headless: bool = Field(
+        default=True, description="Enable headless browser mode (no visible window). Set to False for debugging."
+    )
     output_format: str = Field(default="markdown", description="Output format (html|markdown|json|yaml)")
     proxy: Optional[str] = Field(
         default=None,

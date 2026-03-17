@@ -36,7 +36,7 @@ class SearchEngineRegistry:
             ("wizsearch.engines.searxng_search", "SearxNGSearch", "SearxNGSearchConfig"),
             ("wizsearch.engines.tavily_search", "TavilySearch", "TavilySearchConfig"),
             ("wizsearch.engines.wechat_search", "WeChatSearch", "WeChatSearchConfig"),
-            ## Followings have strict anti-bot protection
+            # Followings have strict anti-bot protection
             ("wizsearch.engines.bing_search", "BingSearch", "BingSearchConfig"),
             ("wizsearch.engines.google_search", "GoogleSearch", "GoogleSearchConfig"),
         ]
@@ -187,6 +187,10 @@ class WizSearchConfig(BaseModel):
     max_results_per_engine: int = Field(default=10, ge=1, le=50, description="Maximum results per engine")
     timeout: int = Field(default=30, ge=1, le=60, description="Request timeout in seconds")
     fail_silently: bool = Field(default=True, description="Continue if some engines fail")
+    headless: bool = Field(
+        default=True,
+        description="Enable headless browser mode for browser-based engines (Baidu, Bing, Brave, Google, WeChat)",
+    )
 
     def model_post_init(self, __context: Any) -> None:
         """Post-initialization to set default enabled_engines if None."""
@@ -229,7 +233,14 @@ class WizSearch(BaseSearch):
         """Initialize all enabled search engines using the registry."""
         for engine_name in self.config.enabled_engines:
             try:
-                engine = SearchEngineRegistry.create_engine(engine_name, max_results=self.config.max_results_per_engine)
+                # Prepare engine-specific config
+                engine_kwargs = {"max_results": self.config.max_results_per_engine}
+
+                # Pass headless config to tarzi-based engines
+                if engine_name in ["baidu", "bing", "brave", "google", "wechat"]:
+                    engine_kwargs["headless"] = self.config.headless
+
+                engine = SearchEngineRegistry.create_engine(engine_name, **engine_kwargs)
 
                 if engine:
                     self.engines[engine_name] = engine

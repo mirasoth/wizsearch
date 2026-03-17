@@ -157,7 +157,7 @@ async def demo_merge_behavior():
 
     result = await wizsearch.search(query)
 
-    print(f"\nMerged Results (showing engine source in raw_response):")
+    print("\nMerged Results (showing engine source in raw_response):")
     print(f"Total unique results: {len(result.sources)}")
 
     # Show how results were merged
@@ -229,7 +229,7 @@ async def demo_performance_comparison():
     wiz_time = time.time() - start_time
     print(f"WizSearch: {len(wiz_result.sources)} unique results in {wiz_time:.2f}s")
 
-    print(f"\nComparison:")
+    print("\nComparison:")
     print(f"- Single engine: {len(single_result.sources)} results, {single_time:.2f}s")
     print(f"- WizSearch: {len(wiz_result.sources)} results, {wiz_time:.2f}s")
     print(f"- Additional unique results: {len(wiz_result.sources) - len(single_result.sources)}")

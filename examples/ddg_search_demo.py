@@ -63,7 +63,7 @@ async def configured_search_example():
         print_search_results(result, "Configured Search Results")
 
         # Print configuration
-        print(f"\nConfiguration used:")
+        print("\nConfiguration used:")
         config_dict = search.get_config()
         print(json.dumps(config_dict, indent=2))
 
@@ -149,15 +149,15 @@ async def error_handling_example():
 
         # Test with empty query
         try:
-            result = await search.search("")
+            await search.search("")
         except DuckDuckGoSearchError as e:
             print(f"✓ Caught expected error for empty query: {e}")
 
         # Test with very long query
         long_query = "very " * 100 + "long query"
         try:
-            result = await search.search(long_query, max_results=1)
-            print(f"✓ Long query handled successfully")
+            await search.search(long_query, max_results=1)
+            print("✓ Long query handled successfully")
         except DuckDuckGoSearchError as e:
             print(f"! Error with long query: {e}")
 

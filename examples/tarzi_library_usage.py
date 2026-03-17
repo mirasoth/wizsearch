@@ -53,11 +53,14 @@ def main():
     # Configuration-based usage
     try:
         # Create config from string
+        # Note: mode = "browser_headless" is the recommended default for production (no visible window)
+        # Use mode = "browser_head" for debugging with a visible browser window
         config_str = """
 [fetcher]
 timeout = 30
 format = "markdown"
 web_driver = "chromedriver"
+mode = "browser_headless"
 
 [search]
 engine = "bing"

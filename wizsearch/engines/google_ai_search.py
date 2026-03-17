@@ -21,20 +21,22 @@ __all__ = [
     "GoogleAISearchError",
 ]
 
-web_searcher_instructions = """Conduct targeted Google Searches to gather the most recent, credible information about "{research_topic}" and synthesize it into a verifiable text artifact.
-
-Instructions:
-- Query should ensure that the most current information is gathered. The current date is {current_date}.
-- Conduct multiple, diverse searches to gather comprehensive information.
-- Consolidate key findings while meticulously tracking the source(s) for each specific piece of information.
-- The output should be a well-written summary or report based on your search findings.
-- Only include the information found in the search results, don't make up any information.
-- Focus on gathering accurate, relevant, and up-to-date information.
-- Include specific details, facts, and current conditions when available.
-
-Research Topic:
-{research_topic}
-"""
+web_searcher_instructions = (
+    "Conduct targeted Google Searches to gather the most recent, credible information about "
+    '"{research_topic}" and synthesize it into a verifiable text artifact.\n'
+    "\n"
+    "Instructions:\n"
+    "- Query should ensure that the most current information is gathered. The current date is {current_date}.\n"
+    "- Conduct multiple, diverse searches to gather comprehensive information.\n"
+    "- Consolidate key findings while meticulously tracking the source(s) for each specific piece of information.\n"
+    "- The output should be a well-written summary or report based on your search findings.\n"
+    "- Only include the information found in the search results, don't make up any information.\n"
+    "- Focus on gathering accurate, relevant, and up-to-date information.\n"
+    "- Include specific details, facts, and current conditions when available.\n"
+    "\n"
+    "Research Topic:\n"
+    "{research_topic}\n"
+)
 
 
 class GoogleAISearchError(Exception):

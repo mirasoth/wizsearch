@@ -93,17 +93,70 @@ asyncio.run(multi_engine_search())
 
 WizSearch supports the following search engines, each with its own configuration:
 
-| Engine | Class Name | API Key Required | Notes |
-|--------|-----------|-----------------|-------|
-| DuckDuckGo | `DuckDuckGoSearch` | No | Free, no rate limits |
-| Tavily | `TavilySearch` | Yes | AI-optimized search, requires `TAVILY_API_KEY` |
-| Google AI | `GoogleAISearch` | Yes | Requires `GOOGLE_API_KEY` |
-| SearxNG | `SearxNGSearch` | No | Self-hosted metasearch engine |
-| Baidu | `BaiduSearch` | No | Chinese search engine (via tarzi) |
-| WeChat | `WeChatSearch` | No | WeChat article search (via tarzi) |
-| Brave | `BraveSearch` | No | Browser-based scraping (via tarzi) |
-| Bing | `BingSearch` | No | Browser-based scraping, anti-bot protection (via tarzi) |
-| Google | `GoogleSearch` | No | Browser-based scraping, anti-bot protection (via tarzi) |
+| Engine | Code Name | Class Name | API Key Required | Notes |
+|--------|-----------|-----------|-----------------|-------|
+| DuckDuckGo | `duckduckgo` | `DuckDuckGoSearch` | No | Free, no rate limits |
+| Tavily | `tavily` | `TavilySearch` | Yes | AI-optimized search, requires `TAVILY_API_KEY` |
+| Google AI | `googleai` | `GoogleAISearch` | Yes | Requires `GEMINI_API_KEY` |
+| SearxNG | `searxng` | `SearxNGSearch` | No | Self-hosted metasearch engine |
+| Baidu | `baidu` | `BaiduSearch` | No | Chinese search engine (via tarzi), runs in headless mode by default |
+| WeChat | `wechat` | `WeChatSearch` | No | WeChat article search (via tarzi), runs in headless mode by default |
+| Brave | `brave` | `BraveSearch` | No | Browser-based scraping (via tarzi), runs in headless mode by default |
+| Bing | `bing` | `BingSearch` | No | Browser-based scraping, anti-bot protection (via tarzi), runs in headless mode by default |
+| Google | `google` | `GoogleSearch` | No | Browser-based scraping, anti-bot protection (via tarzi), runs in headless mode by default |
+
+**Note**: Use the "Code Name" column values when specifying engines in `WizSearchConfig.enabled_engines`.
+
+### Browser Mode Configuration
+
+The browser-based search engines (Baidu, Bing, Brave, Google, and WeChat) use the tarzi library for web scraping. These engines run in **headless mode** by default, meaning no visible browser window appears during searches. This is ideal for production environments as it:
+
+- Doesn't require a display or GUI
+- Consumes fewer resources
+- Runs faster than headed mode
+- Is more suitable for servers and containers
+
+#### Using Headless Mode (Default)
+
+```python
+from wizsearch import GoogleSearch, GoogleSearchConfig
+
+# Default: runs in headless mode (no visible window)
+search = GoogleSearch(config=GoogleSearchConfig())
+results = await search.search("machine learning")
+```
+
+#### Using Headed Mode for Debugging
+
+If you need to see the browser window for debugging (e.g., to check if searches are working correctly, debug anti-bot protections, or observe the scraping process), you can disable headless mode:
+
+```python
+from wizsearch import GoogleSearch, GoogleSearchConfig
+
+# Disable headless mode to see the browser window
+config = GoogleSearchConfig(headless=False)
+search = GoogleSearch(config=config)
+results = await search.search("machine learning")
+```
+
+#### Configuring Browser Mode in WizSearch
+
+When using the `WizSearch` aggregator, you can control the browser mode for all tarzi-based engines:
+
+```python
+from wizsearch import WizSearch, WizSearchConfig
+
+# All tarzi engines will use headless mode (default)
+config = WizSearchConfig(
+    enabled_engines=["google", "bing", "brave"],
+    headless=True  # Default
+)
+wizsearch = WizSearch(config=config)
+
+# Or disable headless for all tarzi engines (useful for debugging)
+config = WizSearchConfig(headless=False)
+wizsearch = WizSearch(config=config)
+```
 
 ### Engine-Specific Examples
 
@@ -163,8 +216,8 @@ for image_url in results.images:
 from wizsearch import GoogleAISearch
 import os
 
-# Set API key (or set GOOGLE_API_KEY environment variable)
-os.environ["GOOGLE_API_KEY"] = "your-google-api-key"
+# Set API key (or set GEMINI_API_KEY environment variable)
+os.environ["GEMINI_API_KEY"] = "your-gemini-api-key"
 
 searcher = GoogleAISearch()
 results = await searcher.search(
@@ -190,11 +243,13 @@ available = WizSearch.get_available_engines()
 print(f"Available engines: {available}")
 
 # Custom configuration
+# Use code names from the table above (e.g., "duckduckgo", "tavily", "brave")
 config = WizSearchConfig(
     enabled_engines=["duckduckgo", "tavily", "brave"],
     max_results_per_engine=10,  # Results per engine
     timeout=30,  # Timeout in seconds
-    fail_silently=True  # Don't raise if some engines fail
+    fail_silently=True,  # Don't raise if some engines fail
+    headless=True  # Use headless mode for browser-based engines (default: True)
 )
 
 wizsearch = WizSearch(config=config)
@@ -403,6 +458,7 @@ uv run python examples/tavily_search_demo.py
   - `max_results_per_engine`: Max results per engine (1-50)
   - `timeout`: Request timeout in seconds (1-60)
   - `fail_silently`: Continue if engines fail (default: True)
+  - `headless`: Enable headless browser mode for browser-based engines (default: True)
 
 - **`BaseSearch`**: Abstract base class for search engines
   - `search(query, **kwargs)`: Async search method
@@ -441,7 +497,7 @@ Some search engines require API keys set as environment variables:
 export TAVILY_API_KEY="your-tavily-api-key"
 
 # Google AI (required for GoogleAISearch)
-export GOOGLE_API_KEY="your-google-api-key"
+export GEMINI_API_KEY="your-gemini-api-key"
 ```
 
 ## Development

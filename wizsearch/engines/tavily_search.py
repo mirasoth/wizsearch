@@ -40,7 +40,8 @@ class TavilySearchConfig(BaseModel):
     country: Optional[str] = Field(None, description="Country for localized results")
     proxy: Optional[str] = Field(
         None,
-        description="Proxy URL (e.g., http://proxy:port). Falls back to HTTPS_PROXY/HTTP_PROXY env vars. Note: applied via env vars since langchain_tavily uses httpx with trust_env=True.",
+        description="Proxy URL (e.g., http://proxy:port). Falls back to HTTPS_PROXY/HTTP_PROXY env vars. "
+        "Note: applied via env vars since langchain_tavily uses httpx with trust_env=True.",
     )
 
     model_config = ConfigDict(extra="forbid")

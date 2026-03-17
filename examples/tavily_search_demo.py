@@ -53,7 +53,7 @@ async def demo_tavily_search():
         print("✅ Tavily search initialized")
 
         # Basic web search
-        print(f"\n🌐 Performing basic web search...")
+        print("\n🌐 Performing basic web search...")
         query = "artificial intelligence latest developments 2024"
         results = await search.search(query=query, search_depth="basic", max_results=5)
 
@@ -64,7 +64,7 @@ async def demo_tavily_search():
             print(format_search_result(result.model_dump(), i))
 
         # Advanced search with filters
-        print(f"\n🎯 Advanced search with domain filtering...")
+        print("\n🎯 Advanced search with domain filtering...")
         advanced_query = "machine learning research papers"
         advanced_results = await search.search(
             query=advanced_query,
@@ -74,14 +74,14 @@ async def demo_tavily_search():
         )
 
         print(f"   Query: '{advanced_query}'")
-        print(f"   Domain filter: Academic sites only")
+        print("   Domain filter: Academic sites only")
         print(f"   Found {len(advanced_results.sources)} results:")
 
         for i, result in enumerate(advanced_results.sources, 1):
             print(format_search_result(result.model_dump(), i))
 
         # News search
-        print(f"\n📰 News search...")
+        print("\n📰 News search...")
         news_query = "AI breakthrough news"
         news_results = await search.search(
             query=news_query,
@@ -97,22 +97,22 @@ async def demo_tavily_search():
             print(format_search_result(result.model_dump(), i))
 
         # Search with exclusions
-        print(f"\n🚫 Search with domain exclusions...")
+        print("\n🚫 Search with domain exclusions...")
         filtered_query = "python programming tutorial"
         filtered_results = await search.search(
             query=filtered_query, exclude_domains=["youtube.com", "reddit.com"], max_results=3
         )
 
         print(f"   Query: '{filtered_query}'")
-        print(f"   Excluded: YouTube, Reddit")
+        print("   Excluded: YouTube, Reddit")
         print(f"   Found {len(filtered_results.sources)} results:")
 
         for i, result in enumerate(filtered_results.sources, 1):
             print(format_search_result(result.model_dump(), i))
 
     except Exception as e:
-        print(f"   ⚠️  Tavily search demo failed: {e}")
-        print(f"   This might be due to API key issues or network problems")
+        print("   ⚠️  Tavily search demo failed:", e)
+        print("   This might be due to API key issues or network problems")
 
 
 async def main():

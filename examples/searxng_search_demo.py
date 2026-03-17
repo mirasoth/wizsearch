@@ -21,6 +21,7 @@ import asyncio
 import os
 
 from wizsearch import SearxNGSearch, SearxNGSearchConfig
+from wizsearch.engines.searxng_search import SearxNGSearchError
 
 
 async def demo_basic_search():
