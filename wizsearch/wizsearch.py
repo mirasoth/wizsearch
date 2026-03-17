@@ -316,7 +316,7 @@ class WizSearch(BaseSearch):
 
     async def _search_engine_with_timeout(
         self, engine_name: str, engine: BaseSearch, query: str, **kwargs
-    ) -> Optional[SearchResult]:
+    ) -> Tuple[Optional[SearchResult], Dict[str, Any]]:
         """
         Search with a specific engine with timeout handling.
 
@@ -327,25 +327,33 @@ class WizSearch(BaseSearch):
             **kwargs: Additional search parameters
 
         Returns:
-            SearchResult or None if timeout/error occurs
+            Tuple of (SearchResult or None, status dict with engine name, status, and error details)
         """
+        status = {"engine": engine_name, "status": "unknown"}
+
         try:
             # Use asyncio.wait_for to implement timeout
             result = await asyncio.wait_for(engine.search(query, **kwargs), timeout=self.config.timeout)
-            logger.info(f"{engine_name} search completed for '{query}' successfully with {len(result.sources)} results")
-            return result
+            status["status"] = "success"
+            status["result_count"] = len(result.sources)
+            logger.info(f"{engine_name} search completed successfully with {len(result.sources)} results")
+            return result, status
 
         except asyncio.TimeoutError:
+            status["status"] = "timeout"
+            status["error"] = f"Timed out after {self.config.timeout}s"
             logger.warning(f"{engine_name} search timed out after {self.config.timeout} seconds")
             if not self.config.fail_silently:
                 raise WizSearchError(f"{engine_name} search timed out")
-            return None
+            return None, status
 
         except Exception as e:
-            logger.error(f"{engine_name} search failed: {e}")
+            status["status"] = "error"
+            status["error"] = str(e)
+            logger.error(f"{engine_name} search failed: {e}", exc_info=True)
             if not self.config.fail_silently:
                 raise WizSearchError(f"{engine_name} search failed: {e}")
-            return None
+            return None, status
 
     async def search(self, query: str, **kwargs) -> SearchResult:
         """
@@ -380,16 +388,25 @@ class WizSearch(BaseSearch):
 
         # Process results
         engine_results = {}
-        for (engine_name, _), result in zip(search_tasks, results):
-            if isinstance(result, Exception):
-                logger.error(f"Exception in {engine_name}: {result}")
+        engine_statuses = {}
+        for (engine_name, _), result_data in zip(search_tasks, results):
+            if isinstance(result_data, Exception):
+                engine_statuses[engine_name] = {"status": "exception", "error": str(result_data)}
+                logger.error(f"Exception in {engine_name}: {result_data}")
                 if not self.config.fail_silently:
-                    raise WizSearchError(f"Search failed in {engine_name}: {result}")
-            elif result is not None:
-                engine_results[engine_name] = result
+                    raise WizSearchError(f"Search failed in {engine_name}: {result_data}")
+            elif result_data is not None:
+                result, status = result_data
+                engine_statuses[engine_name] = status
+                if result is not None:
+                    engine_results[engine_name] = result
 
         # Merge results
         merged_result = self._merge_results(query, engine_results)
+
+        # Add engine status to metadata
+        merged_result.metadata = merged_result.metadata or {}
+        merged_result.metadata["engine_status"] = engine_statuses
 
         total_time = (datetime.now() - start_time).total_seconds()
         logger.info(
