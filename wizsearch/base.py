@@ -1,6 +1,6 @@
 import os
 from abc import ABC, abstractmethod
-from typing import Any, List, Optional
+from typing import Any, Dict, List, Optional
 
 from pydantic import BaseModel, ConfigDict, Field
 
@@ -60,6 +60,9 @@ class SearchResult(BaseModel):
         json_schema_extra={"description": "Raw response from the web search API"},
     )
     follow_up_questions: Optional[List[str]] = Field(None, description="Suggested follow-up questions")
+    metadata: Optional[Dict[str, Any]] = Field(
+        None, description="Additional metadata about the search (e.g., engine status, debug info)"
+    )
 
     model_config = ConfigDict(extra="forbid", arbitrary_types_allowed=True)
 
