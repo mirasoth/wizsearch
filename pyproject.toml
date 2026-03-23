@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "wizsearch"
-version = "1.1.7"
+version = "1.1.8"
 description = "Unified Python library for searching across multiple search engines"
 readme = "README.md"
 license = "MIT"
@@ -36,6 +36,7 @@ dependencies = [
     "ddgs>=9.4.0",
     "tarzi>=0.1.6",
     "crawl4ai>=0.7.4",
+    "aiohttp>=3.8.0",
 ]
 
 [project.optional-dependencies]

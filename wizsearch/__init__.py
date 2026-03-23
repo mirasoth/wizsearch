@@ -6,6 +6,7 @@ from .engines.duckduckgo_search import DuckDuckGoSearch, DuckDuckGoSearchConfig,
 from .engines.google_ai_search import GoogleAISearch
 from .engines.google_search import GoogleSearch, GoogleSearchConfig
 from .engines.searxng_search import SearxNGSearch, SearxNGSearchConfig
+from .engines.serper_search import SerperSearch, SerperSearchConfig, SerperSearchError
 from .engines.tavily_search import TavilySearch, TavilySearchConfig, TavilySearchError
 from .engines.wechat_search import WeChatSearch, WeChatSearchConfig
 from .page_crawler import PageCrawler
@@ -25,6 +26,9 @@ __all__ = [
     "DuckDuckGoSearch",
     "DuckDuckGoSearchConfig",
     "DuckDuckGoSearchError",
+    "SerperSearch",
+    "SerperSearchConfig",
+    "SerperSearchError",
     "SearxNGSearch",
     "SearxNGSearchConfig",
     "BraveSearch",
