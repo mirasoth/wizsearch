@@ -7,7 +7,7 @@ A unified Python library for searching across multiple search engines with a con
 
 ## Features
 
-- **Multiple Search Engines**: Baidu, Bing, Brave, DuckDuckGo, Google, Google AI, SearxNG, Tavily, WeChat (with sogou engine)
+- **Multiple Search Engines**: Baidu, Bing, Brave, DuckDuckGo, Google, Google AI, SearxNG, Serper, Tavily, WeChat (with sogou engine)
 - **Unified Interface**: Single API for all search engines with consistent `SearchResult` format
 - **Multi-Engine Aggregation**: Concurrent searches across multiple engines with round-robin result merging
 - **Page Crawling**: Built-in web page content extraction using Crawl4AI
@@ -93,17 +93,18 @@ asyncio.run(multi_engine_search())
 
 WizSearch supports the following search engines, each with its own configuration:
 
-| Engine | Code Name | Class Name | API Key Required | Notes |
-|--------|-----------|-----------|-----------------|-------|
-| DuckDuckGo | `duckduckgo` | `DuckDuckGoSearch` | No | Free, no rate limits |
-| Tavily | `tavily` | `TavilySearch` | Yes | AI-optimized search, requires `TAVILY_API_KEY` |
-| Google AI | `googleai` | `GoogleAISearch` | Yes | Requires `GEMINI_API_KEY` |
-| SearxNG | `searxng` | `SearxNGSearch` | No | Self-hosted metasearch engine |
-| Baidu | `baidu` | `BaiduSearch` | No | Chinese search engine (via tarzi), runs in headless mode by default |
-| WeChat | `wechat` | `WeChatSearch` | No | WeChat article search (via tarzi), runs in headless mode by default |
-| Brave | `brave` | `BraveSearch` | No | Browser-based scraping (via tarzi), runs in headless mode by default |
-| Bing | `bing` | `BingSearch` | No | Browser-based scraping, anti-bot protection (via tarzi), runs in headless mode by default |
-| Google | `google` | `GoogleSearch` | No | Browser-based scraping, anti-bot protection (via tarzi), runs in headless mode by default |
+| Engine | Code Name | 🔑 API Key | Notes |
+|--------|-----------|-----------|-------|
+| Tavily | `tavily` | ✅ | AI-optimized search, requires `TAVILY_API_KEY` |
+| Google AI | `googleai` | ✅ | Requires `GEMINI_API_KEY` |
+| Serper | `serper` | ✅ | Google search API, requires `SERPER_API_KEY`, supports multiple search types (web, images, news, scholar, maps, videos, etc.) |
+| DuckDuckGo | `duckduckgo` | ❌ | Free, no rate limits |
+| Baidu | `baidu` | ❌ | Chinese search engine (via tarzi), runs in headless mode by default |
+| WeChat | `wechat` | ❌ | WeChat article search (via tarzi), runs in headless mode by default |
+| Brave | `brave` | ❌ | Browser-based scraping (via tarzi), runs in headless mode by default |
+| Bing | `bing` | ❌ | Browser-based scraping, anti-bot protection (via tarzi), runs in headless mode by default |
+| Google | `google` | ❌ | Browser-based scraping, anti-bot protection (via tarzi), runs in headless mode by default |
+| SearxNG | `searxng` | ❌ | Self-hosted metasearch engine |
 
 **Note**: Use the "Code Name" column values when specifying engines in `WizSearchConfig.enabled_engines`.
 
@@ -231,6 +232,45 @@ image_results = await searcher.search(
     search_type="image",
     num_results=10
 )
+```
+
+#### Serper Search (Google API)
+
+Serper provides a powerful Google search API with support for multiple search types:
+
+```python
+from wizsearch import SerperSearch, SerperSearchConfig
+import os
+
+# Set API key (or set SERPER_API_KEY environment variable)
+os.environ["SERPER_API_KEY"] = "your-serper-api-key"
+
+# Web search
+config = SerperSearchConfig(
+    search_type="search",  # Default: web search
+    max_results=10,
+    gl="us",  # Country: United States
+    hl="en",  # Language: English
+)
+searcher = SerperSearch(config=config)
+results = await searcher.search("Python async programming")
+
+# Image search
+config = SerperSearchConfig(search_type="images", max_results=10)
+searcher = SerperSearch(config=config)
+results = await searcher.search("beautiful landscapes")
+
+# News search
+config = SerperSearchConfig(search_type="news", max_results=5)
+searcher = SerperSearch(config=config)
+results = await searcher.search("artificial intelligence")
+
+# Scholar search (academic papers)
+config = SerperSearchConfig(search_type="scholar", max_results=10)
+searcher = SerperSearch(config=config)
+results = await searcher.search("machine learning transformers")
+
+# Other supported search types: videos, maps, places, autocomplete, lens
 ```
 
 ### WizSearch Configuration
@@ -428,6 +468,7 @@ Check the `examples/` directory for comprehensive examples:
 - `wizsearch_demo.py` - Multi-engine search demonstrations
 - `tavily_search_demo.py` - Tavily-specific features
 - `google_ai_search_demo.py` - Google AI search examples
+- `serper_search_demo.py` - Serper search examples with multiple search types
 - `ddg_search_demo.py` - DuckDuckGo search examples
 - Individual engine demos for each supported search engine
 
@@ -440,6 +481,10 @@ uv run python examples/wizsearch_demo.py
 # Tavily demo (requires API key)
 export TAVILY_API_KEY="your-key"
 uv run python examples/tavily_search_demo.py
+
+# Serper demo (requires API key)
+export SERPER_API_KEY="your-key"
+uv run python examples/serper_search_demo.py
 ```
 
 ## API Reference
@@ -498,6 +543,9 @@ export TAVILY_API_KEY="your-tavily-api-key"
 
 # Google AI (required for GoogleAISearch)
 export GEMINI_API_KEY="your-gemini-api-key"
+
+# Serper (required for SerperSearch)
+export SERPER_API_KEY="your-serper-api-key"
 ```
 
 ## Development
